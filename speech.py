@@ -15,11 +15,13 @@ import pyttsx3
 from tkinter import *
 from tkinter import messagebox
 import pyautogui
+import requests
 
 #global voice settings
+voice_variable= 1
 engine = pyttsx3.init()
 voice = engine.getProperty('voices') #get the available voices
-engine.setProperty('voice', voice[1].id) #changing voice to index 1 for female voice
+engine.setProperty('voice', voice[voice_variable].id) #changing voice to index 1 for female voice
 
 def speak(text):
     engine.say(text)
@@ -133,6 +135,31 @@ def success():
             speak("Hey, what's up? My name is Olivia. Press the Listen button to give me orders!")
 
         activateme()
+
+    def get_daily_forecast(location):
+        api_key = "vwO1IXVevVCKFLBqzFGPs4CfndPD0XK9"
+
+        url = f"http://dataservice.accuweather.com/locations/v1/cities/search?q={location}&apikey={api_key}"
+        response = requests.get(url)
+        location_key = response.json()[0]["Key"]
+
+        url = f"http://dataservice.accuweather.com/forecasts/v1/daily/1day/{location_key}?apikey={api_key}&metric=true"
+        response = requests.get(url)
+        forecast_info = response.json()
+
+        date = forecast_info["DailyForecasts"][0]["Date"]
+        min_temp = forecast_info["DailyForecasts"][0]["Temperature"]["Minimum"]["Value"]
+        max_temp = forecast_info["DailyForecasts"][0]["Temperature"]["Maximum"]["Value"]
+        day_text = forecast_info["DailyForecasts"][0]["Day"]["IconPhrase"]
+        night_text = forecast_info["DailyForecasts"][0]["Night"]["IconPhrase"]
+
+        speak(f"Forecast for {location}:")
+        speak(f"Minimum Temperature: {min_temp}°C")
+        speak(f"Maximum Temperature: {max_temp}°C")
+        speak(f"Daytime Weather: {day_text}")
+        speak(f"Nighttime Weather: {night_text}")
+
+
 
     def Listen():
         mixer.init()
@@ -291,6 +318,12 @@ def success():
                             pg.press("t")
                             speak("tangent of %.1f is %.2f." % (term_float, result))
 
+            if there_exists(["check weather", "raining", "sunny", "rain","cloudy","weather"]):
+                speak("Which city would you like to check the weather for?")
+                speak("Islamabad, Lahore , Karachi or Multan")
+                text = get_audio().lower()
+                get_daily_forecast(text)
+
             if there_exists(["spotify","music","open spotify","play a song"]):
                 url=f"https://open.spotify.com/search"
                 webbrowser.get().open(url)
@@ -366,6 +399,15 @@ def success():
                 pg.press("enter")
                 speak(f'Here is what I found for {search_term} on google')
             # Guessing number game
+            if there_exists(["change voice","switch voice","change to male voice","male voice","change assistant voice"]):
+                global voice_variable
+                voice_variable= int(not(voice_variable))
+                engine = pyttsx3.init()
+                voice = engine.getProperty('voices') #get the available voices
+                engine.setProperty('voice', voice[voice_variable].id) #changing voice to index 1 for female voice 0 for male
+                Listen()
+
+
             GAME_STRS = ["game"]
             for phrase in GAME_STRS:
                 if phrase in text:
