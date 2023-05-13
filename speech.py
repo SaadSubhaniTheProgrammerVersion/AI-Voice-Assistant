@@ -51,7 +51,7 @@ def welcome():
         root = Tk()
         root.title("Welcome")
         mixer.init()
-        mixer.music.load('Audio used\welcomeaudio.mp3')
+        mixer.music.load('AudioUsed\welcomeaudio.mp3')
         mixer.music.play()
         my_label = Label(root)
         my_label.pack()
@@ -79,7 +79,7 @@ def get_audio():
 def success():
     def help():
         mixer.init()
-        mixer.music.load('Audio used\Mouse.mp3')
+        mixer.music.load('AudioUsed\Mouse.mp3')
         mixer.music.play()
         time.sleep(1)
         speak("Click on the Listen button to give me orders!")
@@ -87,7 +87,7 @@ def success():
 
     def quit():
         mixer.init()
-        mixer.music.load('Audio used\Mouse.mp3')
+        mixer.music.load('AudioUsed\Mouse.mp3')
         mixer.music.play()
         time.sleep(1)
         import tkinter as tk
@@ -96,11 +96,11 @@ def success():
                                            icon='warning')
         if MsgBox == 'yes':
             mixer.init()
-            mixer.music.load('Audio used\Mouse.mp3')
+            mixer.music.load('AudioUsed\Mouse.mp3')
             mixer.music.play()
             time.sleep(1)
             mixer.init()
-            mixer.music.load('Audio used\Bye.mp3')
+            mixer.music.load('AudioUsed\Bye.mp3')
             mixer.music.play()
             time.sleep(1)
             speak("See you again!")
@@ -108,7 +108,7 @@ def success():
             exit()
         else:
             mixer.init()
-            mixer.music.load('Audio used\Mouse.mp3')
+            mixer.music.load('AudioUsed\Mouse.mp3')
             mixer.music.play()
             time.sleep(1)
             speak("returning back!")
@@ -136,7 +136,7 @@ def success():
 
     def Listen():
         mixer.init()
-        mixer.music.load('Audio used\Mouse.mp3')
+        mixer.music.load('AudioUsed\Mouse.mp3')
         mixer.music.play()
         time.sleep(1)
         while True:
@@ -419,7 +419,7 @@ def success():
             for phrase in EXIT_STRS:
                 if phrase in text:
                     mixer.init()
-                    mixer.music.load('Audio used\Bye.mp3')
+                    mixer.music.load('AudioUsed\Bye.mp3')
                     mixer.music.play()
                     time.sleep(1)
                     speak("See you again!")
@@ -433,7 +433,7 @@ def success():
 
     def cont():
         mixer.init()
-        mixer.music.load('Audio used\Mouse.mp3')
+        mixer.music.load('AudioUsed\Mouse.mp3')
         mixer.music.play()
         time.sleep(1)
         root.destroy()
@@ -442,7 +442,7 @@ def success():
     root.title("Introduction")
     # label1 = Label(root, )
     # C = Canvas(root, bg="blue", height=450, width=500)
-    # filename = PhotoImage(file="Images used\down.png")
+    # filename = PhotoImage(file="ImagesUsed\down.png")
     # background_label = Label(root, image=filename)
     # background_label.place(x=0, y=0, relwidth=1, relheight=1)
     # C.pack()
@@ -459,7 +459,7 @@ def success():
     root.title("Voice Recognition App")
     label1 = Label(root, )
     C = Canvas(root, bg="blue", height=450, width=500)
-    filename = PhotoImage(file="Images used\Robot.png")
+    filename = PhotoImage(file="ImagesUsed\Robot.png")
     background_label = Label(root, image=filename)
     background_label.place(x=0, y=0, relwidth=1, relheight=1)
     C.pack()
@@ -484,7 +484,7 @@ def success():
 #         messagebox.showinfo("", "Invalid Input")
 #     elif (uname == "Saad" and password == "123"):
 #         mixer.init()
-#         mixer.music.load('Audio used\Mouse.mp3')
+#         mixer.music.load('AudioUsed\Mouse.mp3')
 #         mixer.music.play()
 #         messagebox.showinfo("", "Login Success")
 #         speak("Welcome")
@@ -499,7 +499,7 @@ def success():
 
 # root = Tk()
 # C = Canvas(root, bg="blue", height=450, width=500)
-# filename = PhotoImage(file="Images used\lock.png")
+# filename = PhotoImage(file="ImagesUsed\lock.png")
 # background_label = Label(root, image=filename)
 # background_label.place(x=0, y=0, relwidth=1, relheight=1)
 # C.pack()
