@@ -335,18 +335,27 @@ def success():
 
             if there_exists(["spotify","music","open spotify","play a song","song"]):
                 url=f"https://open.spotify.com/search"
+                teb_times=0
                 webbrowser.get().open(url)
                 time.sleep(3)
-                speak("Which song would you like me to play?")
+                speak("Would you like to search for a song or an artist?")
                 text = get_audio().lower()  # calling function
+                if there_exists(["song"]):
+                    tab_times=3
+                    speak("What song would you like to play?")
+                    text = get_audio().lower()  # calling function
+                elif there_exists(["artist"]):
+                    tab_times=2
+                    speak("What artist would you like to play?")
+                    text = get_audio().lower()  # calling function
+
                 search_term = text
                 pg.write(text)
                 pg.press("enter")
                 #enter a delay of 1 second
-                time.sleep(1)
-                pg.press("tab")
-                pg.press("tab")
-                pg.press("tab")
+                time.sleep(3)
+                for i in range (tab_times):
+                    pg.press("tab")
                 pg.press("Enter")
                 speak(f'Playing {search_term} on spotify')
 
@@ -491,8 +500,8 @@ def success():
         time.sleep(1)
         root.destroy()
 
-    root = Tk()
-    root.title("Introduction")
+    # root = Tk()
+    # root.title("Introduction")
     # label1 = Label(root, )
     # C = Canvas(root, bg="blue", height=450, width=500)
     # filename = PhotoImage(file="Images used\down.png")
@@ -505,9 +514,9 @@ def success():
     # bottomFrame = Frame(root)
     # bottomFrame.pack(side=BOTTOM)
     import tkinter.font as font
-    myFont = font.Font(weight="bold")
-    root.after(5000, button)
-    root.mainloop()
+    # myFont = font.Font(weight="bold")
+    # root.after(5000, button)
+    # root.mainloop()
     root = Tk()
     root.title("Voice Recognition App")
     label1 = Label(root, )
