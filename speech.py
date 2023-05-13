@@ -19,14 +19,20 @@ import requests
 
 #global voice settings
 voice_variable= 1
+first_listen= TRUE
 engine = pyttsx3.init()
 voice = engine.getProperty('voices') #get the available voices
 engine.setProperty('voice', voice[voice_variable].id) #changing voice to index 1 for female voice
 
 def speak(text):
+    global voice_variable
+    if(voice_variable==1):
+        name="Olivia"
+    elif(voice_variable==0):
+        name="Harry"
     engine.say(text)
     engine.runAndWait()
-    print(f"Olivia: {text}")  # print what app said
+    print(f"{name}: {text}")  # print what app said
 
 
 def welcome():
@@ -162,10 +168,9 @@ def success():
 
 
     def Listen():
+        global first_listen
         mixer.init()
-        mixer.music.load('Audio used\Mouse.mp3')
-        mixer.music.play()
-        time.sleep(1)
+        mixer.music.load('Audio used\Mic2.mp3')
         while True:
             def there_exists(terms):
                 for term in terms:
@@ -173,7 +178,11 @@ def success():
                         return True
 
             print("Listening...")
-            speak("What do you want me to do?")
+            if(first_listen==TRUE):
+                speak("What do you want me to do?")
+            
+            mixer.music.play()
+            first_listen=FALSE
             text = get_audio().lower()
             # open notepad
             if there_exists(["open notepad"]):
@@ -324,9 +333,10 @@ def success():
                 text = get_audio().lower()
                 get_daily_forecast(text)
 
-            if there_exists(["spotify","music","open spotify","play a song"]):
+            if there_exists(["spotify","music","open spotify","play a song","song"]):
                 url=f"https://open.spotify.com/search"
                 webbrowser.get().open(url)
+                time.sleep(3)
                 speak("Which song would you like me to play?")
                 text = get_audio().lower()  # calling function
                 search_term = text
@@ -405,6 +415,7 @@ def success():
                 engine = pyttsx3.init()
                 voice = engine.getProperty('voices') #get the available voices
                 engine.setProperty('voice', voice[voice_variable].id) #changing voice to index 1 for female voice 0 for male
+                first_listen= TRUE
                 Listen()
 
 
