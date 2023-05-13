@@ -90,8 +90,16 @@ def success():
         mixer.music.load('Audio used\Mouse.mp3')
         mixer.music.play()
         time.sleep(1)
-        speak("Click on the Listen button to give me orders!")
-        messagebox.showinfo("info", "Click on \"Listen\" to give your order verbally!")
+        speak("Click on the Listen button to give me orders. Here is a list of things I can perform for you")
+        messagebox.showinfo("List of Things I can do", "I can perform the following tasks for you:\n"
+                                                        "1. Open Windows Apps Like Word/Powerpoint\n"
+                                                        "2. Perform Calculations\n"
+                                                        "3. Check Weather\n"
+                                                        "4. Play a song on Spotify\n"
+                                                        "5. Search on Google\n"
+                                                        "6. Search on Youtube\n"
+                                                        "7. Play Voice Controlled Games\n"
+                                                        "8. Change my voice\n")
 
     def quit():
         mixer.init()
@@ -127,7 +135,7 @@ def success():
             x=57, y=447)
         Button(root, text="QUIT", bg="black", fg="yellow", font=myFont, height=3, width=18, command=quit).place(x=557,
                                                                                                                 y=447)
-        Button(root, text="? HELP", bg="black", fg="yellow", font=myFont, height=3, width=18, command=help).place(x=957,
+        Button(root, text="HELP", bg="black", fg="yellow", font=myFont, height=3, width=18, command=help).place(x=957,
                                                                                                                   y=607)
 
         def activateme():
@@ -326,7 +334,35 @@ def success():
                                 pg.press(x)
                             pg.press("t")
                             speak("tangent of %.1f is %.2f." % (term_float, result))
+            if there_exists(["what's the time","time"]):
+                strTime = datetime.datetime.now().strftime("%I:%M %p")
+                speak(f"It is {strTime} right now")
+                
 
+            if there_exists(["what's the date","date","today"]):
+                strDate = datetime.datetime.now().strftime("%d %B %Y")
+                speak(f"Today is {strDate}")
+
+            if there_exists(["open an application","appliction","app"]):
+                speak("Which application would you like to open?")
+                text = get_audio().lower()
+                pyautogui.press('win')
+                time.sleep(1)
+                pyautogui.write(text)
+                time.sleep(1.5)
+                pyautogui.press('enter')
+
+            if there_exists(["launch"]):
+                last_term = text.split("launch ")[-1]
+                speak(f"Launching {last_term}")
+                pyautogui.press('win')
+                time.sleep(1)
+                pyautogui.write(last_term)
+                time.sleep(1.5)
+                pyautogui.press('enter')
+
+
+    # type app name and wait for search result
             if there_exists(["check weather", "raining", "sunny", "rain","cloudy","weather"]):
                 speak("Which city would you like to check the weather for?")
                 speak("Islamabad, Lahore , Karachi or Multan")
