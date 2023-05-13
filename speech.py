@@ -155,13 +155,18 @@ def success():
 
         url = f"http://dataservice.accuweather.com/locations/v1/cities/search?q={location}&apikey={api_key}"
         response = requests.get(url)
-        location_key = response.json()[0]["Key"]
 
+        try:
+            location_key = response.json()[0]["Key"]
+        except Exception:
+            speak(f"No results for {location}")
+            return
+        
         url = f"http://dataservice.accuweather.com/forecasts/v1/daily/1day/{location_key}?apikey={api_key}&metric=true"
         response = requests.get(url)
         forecast_info = response.json()
 
-        date = forecast_info["DailyForecasts"][0]["Date"]
+        # date = forecast_info["DailyForecasts"][0]["Date"]
         min_temp = forecast_info["DailyForecasts"][0]["Temperature"]["Minimum"]["Value"]
         max_temp = forecast_info["DailyForecasts"][0]["Temperature"]["Maximum"]["Value"]
         day_text = forecast_info["DailyForecasts"][0]["Day"]["IconPhrase"]
@@ -365,7 +370,6 @@ def success():
     # type app name and wait for search result
             if there_exists(["check weather", "raining", "sunny", "rain","cloudy","weather"]):
                 speak("Which city would you like to check the weather for?")
-                speak("Islamabad, Lahore , Karachi or Multan")
                 text = get_audio().lower()
                 get_daily_forecast(text)
 
