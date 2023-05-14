@@ -153,7 +153,9 @@ def success():
         activateme()
 
     def get_daily_forecast(location):
-        api_key = "vwO1IXVevVCKFLBqzFGPs4CfndPD0XK9"
+        with open('accuweatherkey.txt', 'r') as file:
+            key = file.read().strip()
+        api_key = key
 
         url = f"http://dataservice.accuweather.com/locations/v1/cities/search?q={location}&apikey={api_key}"
         response = requests.get(url)
@@ -183,7 +185,9 @@ def success():
 
     
     def ChatGPT(prompt):
-        openai.api_key = "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"
+        with open('gptkey.txt', 'r') as file:
+            key = file.read().strip()
+        openai.api_key =key
         response = openai.Completion.create(model="text-davinci-003", prompt=prompt, temperature=1, max_tokens=256)
         response=(str(response['choices'][0]['text']).replace("\n",""))
         return response
