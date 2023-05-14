@@ -21,6 +21,7 @@ import openai
 #global voice settings
 voice_variable= 1
 first_listen= TRUE
+name=""
 Chat_GPT= TRUE
 engine = pyttsx3.init()
 voice = engine.getProperty('voices') #get the available voices
@@ -28,6 +29,7 @@ engine.setProperty('voice', voice[voice_variable].id) #changing voice to index 1
 
 def speak(text):
     global voice_variable
+    global name
     if(voice_variable==1):
         name="Olivia"
     elif(voice_variable==0):
@@ -72,7 +74,8 @@ def welcome():
 
 def get_audio():
     r = sr.Recognizer()
-    with sr.Microphone() as source:
+    with sr.Microphone() as source:           
+
         audio = r.listen(source)
         said = ""
 
@@ -81,7 +84,8 @@ def get_audio():
             print(said)
         except Exception as e:
             speak("Sorry I could not understand. Can you please repeat")
-            get_audio()
+            text=get_audio()
+            return text
 
     return said.lower()
 
@@ -454,6 +458,9 @@ def success():
                             pg.press("tab")
                             pg.press("tab")
                             pg.press("enter")
+
+            if there_exists(["what is your name","your name"]):
+                Listen()
             # 5: search google
             if there_exists(["google","search on the internet","look up on the internet","internet","search"]):
                 Chat_GPT=FALSE
