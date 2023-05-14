@@ -16,10 +16,12 @@ from tkinter import *
 from tkinter import messagebox
 import pyautogui
 import requests
+import openai
 
 #global voice settings
 voice_variable= 1
 first_listen= TRUE
+Chat_GPT= TRUE
 engine = pyttsx3.init()
 voice = engine.getProperty('voices') #get the available voices
 engine.setProperty('voice', voice[voice_variable].id) #changing voice to index 1 for female voice
@@ -179,9 +181,17 @@ def success():
         speak(f"Nighttime Weather: {night_text}")
 
 
-
+    
+    def ChatGPT(prompt):
+        openai.api_key = "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"
+        response = openai.Completion.create(model="text-davinci-003", prompt=prompt, temperature=1, max_tokens=256)
+        response=(str(response['choices'][0]['text']).replace("\n",""))
+        return response
+    
     def Listen():
         global first_listen
+        global Chat_GPT
+        Chat_GPT=TRUE
         mixer.init()
         mixer.music.load('Audio used\Mic2.mp3')
         while True:
@@ -189,6 +199,7 @@ def success():
                 for term in terms:
                     if term in text:
                         return True
+            
 
             print("Listening...")
             if(first_listen==TRUE):
@@ -199,6 +210,7 @@ def success():
             text = get_audio().lower()
             # open notepad
             if there_exists(["open notepad"]):
+                Chat_GPT=FALSE
                 subprocess.Popen("notepad.exe")
                 time.sleep(2)
                 speak("What would you like me to note down here?")
@@ -211,6 +223,7 @@ def success():
 
             for phrase in WORD_STRS:
                 if phrase in text:
+                    Chat_GPT=FALSE
                     pyautogui.hotkey("winleft", "r")
                     pyautogui.typewrite("WINWORD.EXE")
                     pyautogui.press("enter")
@@ -225,12 +238,14 @@ def success():
             PPT_STRS = ["open microsoft powerpoint", "open powerpoint","powerpoint","make a presentation"]
             for phrase in PPT_STRS:
                 if phrase in text:
+                    Chat_GPT=FALSE
                     pyautogui.hotkey("winleft", "r")
                     pyautogui.typewrite("powerpnt.exe")
                     pyautogui.press("enter")
             CALC_STRS = ["open calculator"]
             for phrase in CALC_STRS:
                 if phrase in text:
+                    Chat_GPT=FALSE
                     subprocess.Popen('C:\\Windows\\System32\\calc.exe')
                     speak("I can perform addition, subtraction, multiplication and some trigonometric calculation")
                     speak("What do you want me to perform here?")
@@ -340,11 +355,13 @@ def success():
                             pg.press("t")
                             speak("tangent of %.1f is %.2f." % (term_float, result))
             if there_exists(["what's the time","time"]):
+                Chat_GPT=FALSE
                 strTime = datetime.datetime.now().strftime("%I:%M %p")
                 speak(f"It is {strTime} right now")
                 
 
             if there_exists(["what's the date","date","today"]):
+                Chat_GPT=FALSE
                 strDate = datetime.datetime.now().strftime("%d %B %Y")
                 speak(f"Today is {strDate}")
 
@@ -352,11 +369,13 @@ def success():
 
     # type app name and wait for search result
             if there_exists(["check weather", "raining", "sunny", "rain","cloudy","weather"]):
+                Chat_GPT=FALSE
                 speak("Which city would you like to check the weather for?")
                 text = get_audio().lower()
                 get_daily_forecast(text)
 
             if there_exists(["spotify","music","open spotify","play a song","song"]):
+                Chat_GPT=FALSE
                 url=f"https://open.spotify.com/search"
                 teb_times=0
                 webbrowser.get().open(url)
@@ -385,6 +404,7 @@ def success():
 
                     # new youtube
             if there_exists(["youtube"]):
+                Chat_GPT=FALSE
                 url = f"https://youtube.com"
                 webbrowser.get().open(url)
                 time.sleep(2)
@@ -432,6 +452,7 @@ def success():
                             pg.press("enter")
             # 5: search google
             if there_exists(["google","search on the internet","look up on the internet","internet","search"]):
+                Chat_GPT=FALSE
                 url = f"https://google.com"
                 webbrowser.get().open(url)
                 speak("What would you like me to search?")
@@ -441,7 +462,8 @@ def success():
                 pg.press("enter")
                 speak(f'Here is what I found for {search_term} on google')
             # Guessing number game
-            if there_exists(["change voice","switch voice","change to male voice","male voice","change assistant voice"]):
+            if there_exists(["change voice","switch voice","change to male voice","male voice","change assistant voice","male voice"]):
+                Chat_GPT=FALSE
                 global voice_variable
                 voice_variable= int(not(voice_variable))
                 engine = pyttsx3.init()
@@ -451,6 +473,7 @@ def success():
                 Listen()
 
             if there_exists(["open an application","appliction","app"]):
+                Chat_GPT=FALSE
                 speak("Which application would you like to open?")
                 text = get_audio().lower()
                 pyautogui.press('win')
@@ -460,6 +483,7 @@ def success():
                 pyautogui.press('enter')
 
             if there_exists(["launch"]):
+                Chat_GPT=FALSE
                 last_term = text.split("launch ")[-1]
                 if(last_term=='launch'):
                     speak("Sorry I could not understand")
@@ -475,6 +499,7 @@ def success():
             GAME_STRS = ["game"]
             for phrase in GAME_STRS:
                 if phrase in text:
+                    Chat_GPT=FALSE
                     speak("Which game would you like to play?")
                     time.sleep(1)
                     speak("Number 1: The guessing number game?")
@@ -517,10 +542,15 @@ def success():
                                 if lives == 0:
                                     print("You have lost the game!")
                                     speak("You have lost the game!")
-                    if there_exists(["hangman"]):
-                        root.destroy()
-                        os.system("python speech2.py") #to open second python file in the same dir
-                        success()#when the new file terminates, it will allow rerun of my app
+
+            if Chat_GPT==TRUE:
+                        prompt = text
+                        speak(f"Searching the Web for {text}")
+                        response = ChatGPT(prompt)
+                        speak(response)
+                    
+                    
+
             EXIT_STRS = ["exit", "quit", "go offline"]
             for phrase in EXIT_STRS:
                 if phrase in text:
@@ -531,6 +561,8 @@ def success():
                     speak("See you again!")
                     exit()
             break
+
+            
 
     def button():
         Button(root, text="CONTINUE", bg="black", fg="yellow", font=myFont, height=2, width=15, command=cont).place(
