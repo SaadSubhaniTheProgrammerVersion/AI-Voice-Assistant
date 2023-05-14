@@ -92,7 +92,7 @@ def success():
         time.sleep(1)
         speak("Click on the Listen button to give me orders. Here is a list of things I can perform for you")
         messagebox.showinfo("List of Things I can do", "I can perform the following tasks for you:\n"
-                                                        "1. Open Windows Apps Like Word/Powerpoint\n"
+                                                        "1. Open Windows Apps\n"
                                                         "2. Perform Calculations\n"
                                                         "3. Check Weather\n"
                                                         "4. Play a song on Spotify\n"
@@ -348,23 +348,6 @@ def success():
                 strDate = datetime.datetime.now().strftime("%d %B %Y")
                 speak(f"Today is {strDate}")
 
-            if there_exists(["open an application","appliction","app"]):
-                speak("Which application would you like to open?")
-                text = get_audio().lower()
-                pyautogui.press('win')
-                time.sleep(1)
-                pyautogui.write(text)
-                time.sleep(1.5)
-                pyautogui.press('enter')
-
-            if there_exists(["launch"]):
-                last_term = text.split("launch ")[-1]
-                speak(f"Launching {last_term}")
-                pyautogui.press('win')
-                time.sleep(1)
-                pyautogui.write(last_term)
-                time.sleep(1.5)
-                pyautogui.press('enter')
 
 
     # type app name and wait for search result
@@ -466,6 +449,27 @@ def success():
                 engine.setProperty('voice', voice[voice_variable].id) #changing voice to index 1 for female voice 0 for male
                 first_listen= TRUE
                 Listen()
+
+            if there_exists(["open an application","appliction","app"]):
+                speak("Which application would you like to open?")
+                text = get_audio().lower()
+                pyautogui.press('win')
+                time.sleep(1)
+                pyautogui.write(text)
+                time.sleep(1.5)
+                pyautogui.press('enter')
+
+            if there_exists(["launch"]):
+                last_term = text.split("launch ")[-1]
+                if(last_term=='launch'):
+                    speak("Sorry I could not understand")
+                    return
+                speak(f"Launching {last_term}")
+                pyautogui.press('win')
+                time.sleep(1)
+                pyautogui.write(last_term)
+                time.sleep(1.5)
+                pyautogui.press('enter')
 
 
             GAME_STRS = ["game"]
