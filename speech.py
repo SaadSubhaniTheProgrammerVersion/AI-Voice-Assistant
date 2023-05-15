@@ -15,16 +15,28 @@ import pyttsx3
 from tkinter import *
 from tkinter import messagebox
 import pyautogui
+import requests
+import openai
 
 #global voice settings
+voice_variable= 1
+first_listen= TRUE
+name=""
+Chat_GPT= TRUE
 engine = pyttsx3.init()
 voice = engine.getProperty('voices') #get the available voices
-engine.setProperty('voice', voice[1].id) #changing voice to index 1 for female voice
+engine.setProperty('voice', voice[voice_variable].id) #changing voice to index 1 for female voice
 
 def speak(text):
+    global voice_variable
+    global name
+    if(voice_variable==1):
+        name="Olivia"
+    elif(voice_variable==0):
+        name="Harry"
     engine.say(text)
     engine.runAndWait()
-    print(f"Olivia: {text}")  # print what app said
+    print(f"{name}: {text}")  # print what app said
 
 
 def welcome():
@@ -62,7 +74,8 @@ def welcome():
 
 def get_audio():
     r = sr.Recognizer()
-    with sr.Microphone() as source:
+    with sr.Microphone() as source:           
+
         audio = r.listen(source)
         said = ""
 
@@ -71,7 +84,8 @@ def get_audio():
             print(said)
         except Exception as e:
             speak("Sorry I could not understand. Can you please repeat")
-            get_audio()
+            text=get_audio()
+            return text
 
     return said.lower()
 
@@ -82,8 +96,16 @@ def success():
         mixer.music.load('AudioUsed\Mouse.mp3')
         mixer.music.play()
         time.sleep(1)
-        speak("Click on the Listen button to give me orders!")
-        messagebox.showinfo("info", "Click on \"Listen\" to give your order verbally!")
+        speak("Click on the Listen button to give me orders. Here is a list of things I can perform for you")
+        messagebox.showinfo("List of Things I can do", "I can perform the following tasks for you:\n"
+                                                        "1. Open Windows Apps\n"
+                                                        "2. Perform Calculations\n"
+                                                        "3. Check Weather\n"
+                                                        "4. Play a song on Spotify\n"
+                                                        "5. Search on Google\n"
+                                                        "6. Search on Youtube\n"
+                                                        "7. Play Voice Controlled Games\n"
+                                                        "8. Change my voice\n")
 
     def quit():
         mixer.init()
@@ -119,7 +141,7 @@ def success():
             x=57, y=447)
         Button(root, text="QUIT", bg="black", fg="yellow", font=myFont, height=3, width=18, command=quit).place(x=557,
                                                                                                                 y=447)
-        Button(root, text="? HELP", bg="black", fg="yellow", font=myFont, height=3, width=18, command=help).place(x=957,
+        Button(root, text="HELP", bg="black", fg="yellow", font=myFont, height=3, width=18, command=help).place(x=957,
                                                                                                                   y=607)
 
         def activateme():
@@ -134,22 +156,69 @@ def success():
 
         activateme()
 
+    def get_daily_forecast(location):
+        with open('accuweatherkey.txt', 'r') as file:
+            key = file.read().strip()
+        api_key = key
+
+        url = f"http://dataservice.accuweather.com/locations/v1/cities/search?q={location}&apikey={api_key}"
+        response = requests.get(url)
+
+        try:
+            location_key = response.json()[0]["Key"]
+        except Exception:
+            speak(f"No results for {location}")
+            return
+        
+        url = f"http://dataservice.accuweather.com/forecasts/v1/daily/1day/{location_key}?apikey={api_key}&metric=true"
+        response = requests.get(url)
+        forecast_info = response.json()
+
+        # date = forecast_info["DailyForecasts"][0]["Date"]
+        min_temp = forecast_info["DailyForecasts"][0]["Temperature"]["Minimum"]["Value"]
+        max_temp = forecast_info["DailyForecasts"][0]["Temperature"]["Maximum"]["Value"]
+        day_text = forecast_info["DailyForecasts"][0]["Day"]["IconPhrase"]
+        night_text = forecast_info["DailyForecasts"][0]["Night"]["IconPhrase"]
+
+        speak(f"Forecast for {location}:")
+        speak(f"Minimum Temperature: {min_temp}°C")
+        speak(f"Maximum Temperature: {max_temp}°C")
+        speak(f"Daytime Weather: {day_text}")
+        speak(f"Nighttime Weather: {night_text}")
+
+
+    
+    def ChatGPT(prompt):
+        with open('gptkey.txt', 'r') as file:
+            key = file.read().strip()
+        openai.api_key =key
+        response = openai.Completion.create(model="text-davinci-003", prompt=prompt, temperature=1, max_tokens=256)
+        response=(str(response['choices'][0]['text']).replace("\n",""))
+        return response
+    
     def Listen():
+        global first_listen
+        global Chat_GPT
+        Chat_GPT=TRUE
         mixer.init()
-        mixer.music.load('AudioUsed\Mouse.mp3')
-        mixer.music.play()
-        time.sleep(1)
+        mixer.music.load('Audio used\Mic2.mp3')
         while True:
             def there_exists(terms):
                 for term in terms:
                     if term in text:
                         return True
+            
 
             print("Listening...")
-            speak("What do you want me to do?")
+            if(first_listen==TRUE):
+                speak("What do you want me to do?")
+            
+            mixer.music.play()
+            first_listen=FALSE
             text = get_audio().lower()
             # open notepad
             if there_exists(["open notepad"]):
+                Chat_GPT=FALSE
                 subprocess.Popen("notepad.exe")
                 time.sleep(2)
                 speak("What would you like me to note down here?")
@@ -162,6 +231,7 @@ def success():
 
             for phrase in WORD_STRS:
                 if phrase in text:
+                    Chat_GPT=FALSE
                     pyautogui.hotkey("winleft", "r")
                     pyautogui.typewrite("WINWORD.EXE")
                     pyautogui.press("enter")
@@ -176,12 +246,14 @@ def success():
             PPT_STRS = ["open microsoft powerpoint", "open powerpoint","powerpoint","make a presentation"]
             for phrase in PPT_STRS:
                 if phrase in text:
+                    Chat_GPT=FALSE
                     pyautogui.hotkey("winleft", "r")
                     pyautogui.typewrite("powerpnt.exe")
                     pyautogui.press("enter")
             CALC_STRS = ["open calculator"]
             for phrase in CALC_STRS:
                 if phrase in text:
+                    Chat_GPT=FALSE
                     subprocess.Popen('C:\\Windows\\System32\\calc.exe')
                     speak("I can perform addition, subtraction, multiplication and some trigonometric calculation")
                     speak("What do you want me to perform here?")
@@ -290,26 +362,57 @@ def success():
                                 pg.press(x)
                             pg.press("t")
                             speak("tangent of %.1f is %.2f." % (term_float, result))
+            if there_exists(["what's the time","time"]):
+                Chat_GPT=FALSE
+                strTime = datetime.datetime.now().strftime("%I:%M %p")
+                speak(f"It is {strTime} right now")
+                
 
-            if there_exists(["spotify","music","open spotify","play a song"]):
+            if there_exists(["what's the date","date","today"]):
+                Chat_GPT=FALSE
+                strDate = datetime.datetime.now().strftime("%d %B %Y")
+                speak(f"Today is {strDate}")
+
+
+
+    # type app name and wait for search result
+            if there_exists(["check weather", "raining", "sunny", "rain","cloudy","weather"]):
+                Chat_GPT=FALSE
+                speak("Which city would you like to check the weather for?")
+                text = get_audio().lower()
+                get_daily_forecast(text)
+
+            if there_exists(["spotify","music","open spotify","play a song","song"]):
+                Chat_GPT=FALSE
                 url=f"https://open.spotify.com/search"
+                teb_times=0
                 webbrowser.get().open(url)
-                speak("Which song would you like me to play?")
+                time.sleep(3)
+                speak("Would you like to search for a song or an artist?")
                 text = get_audio().lower()  # calling function
+                if there_exists(["song"]):
+                    tab_times=3
+                    speak("What song would you like to play?")
+                    text = get_audio().lower()  # calling function
+                elif there_exists(["artist"]):
+                    tab_times=2
+                    speak("What artist would you like to play?")
+                    text = get_audio().lower()  # calling function
+
                 search_term = text
                 pg.write(text)
                 pg.press("enter")
                 #enter a delay of 1 second
-                time.sleep(1)
-                pg.press("tab")
-                pg.press("tab")
-                pg.press("tab")
+                time.sleep(3)
+                for i in range (tab_times):
+                    pg.press("tab")
                 pg.press("Enter")
                 speak(f'Playing {search_term} on spotify')
 
 
                     # new youtube
             if there_exists(["youtube"]):
+                Chat_GPT=FALSE
                 url = f"https://youtube.com"
                 webbrowser.get().open(url)
                 time.sleep(2)
@@ -355,8 +458,12 @@ def success():
                             pg.press("tab")
                             pg.press("tab")
                             pg.press("enter")
+
+            if there_exists(["what is your name","your name"]):
+                Listen()
             # 5: search google
             if there_exists(["google","search on the internet","look up on the internet","internet","search"]):
+                Chat_GPT=FALSE
                 url = f"https://google.com"
                 webbrowser.get().open(url)
                 speak("What would you like me to search?")
@@ -366,9 +473,44 @@ def success():
                 pg.press("enter")
                 speak(f'Here is what I found for {search_term} on google')
             # Guessing number game
+            if there_exists(["change voice","switch voice","change to male voice","male voice","change assistant voice","male voice"]):
+                Chat_GPT=FALSE
+                global voice_variable
+                voice_variable= int(not(voice_variable))
+                engine = pyttsx3.init()
+                voice = engine.getProperty('voices') #get the available voices
+                engine.setProperty('voice', voice[voice_variable].id) #changing voice to index 1 for female voice 0 for male
+                first_listen= TRUE
+                Listen()
+
+            if there_exists(["open an application","appliction","app"]):
+                Chat_GPT=FALSE
+                speak("Which application would you like to open?")
+                text = get_audio().lower()
+                pyautogui.press('win')
+                time.sleep(1)
+                pyautogui.write(text)
+                time.sleep(1.5)
+                pyautogui.press('enter')
+
+            if there_exists(["launch"]):
+                Chat_GPT=FALSE
+                last_term = text.split("launch ")[-1]
+                if(last_term=='launch'):
+                    speak("Sorry I could not understand")
+                    return
+                speak(f"Launching {last_term}")
+                pyautogui.press('win')
+                time.sleep(1)
+                pyautogui.write(last_term)
+                time.sleep(1.5)
+                pyautogui.press('enter')
+
+
             GAME_STRS = ["game"]
             for phrase in GAME_STRS:
                 if phrase in text:
+                    Chat_GPT=FALSE
                     speak("Which game would you like to play?")
                     time.sleep(1)
                     speak("Number 1: The guessing number game?")
@@ -411,10 +553,15 @@ def success():
                                 if lives == 0:
                                     print("You have lost the game!")
                                     speak("You have lost the game!")
-                    if there_exists(["hangman"]):
-                        root.destroy()
-                        os.system("python speech2.py") #to open second python file in the same dir
-                        success()#when the new file terminates, it will allow rerun of my app
+
+            if Chat_GPT==TRUE:
+                        prompt = text
+                        speak(f"Searching the Web for {text}")
+                        response = ChatGPT(prompt)
+                        speak(response)
+                    
+                    
+
             EXIT_STRS = ["exit", "quit", "go offline"]
             for phrase in EXIT_STRS:
                 if phrase in text:
@@ -425,6 +572,8 @@ def success():
                     speak("See you again!")
                     exit()
             break
+
+            
 
     def button():
         Button(root, text="CONTINUE", bg="black", fg="yellow", font=myFont, height=2, width=15, command=cont).place(
@@ -438,8 +587,8 @@ def success():
         time.sleep(1)
         root.destroy()
 
-    root = Tk()
-    root.title("Introduction")
+    # root = Tk()
+    # root.title("Introduction")
     # label1 = Label(root, )
     # C = Canvas(root, bg="blue", height=450, width=500)
     # filename = PhotoImage(file="ImagesUsed\down.png")
@@ -452,9 +601,9 @@ def success():
     # bottomFrame = Frame(root)
     # bottomFrame.pack(side=BOTTOM)
     import tkinter.font as font
-    myFont = font.Font(weight="bold")
-    root.after(5000, button)
-    root.mainloop()
+    # myFont = font.Font(weight="bold")
+    # root.after(5000, button)
+    # root.mainloop()
     root = Tk()
     root.title("Voice Recognition App")
     label1 = Label(root, )
