@@ -73,6 +73,9 @@ def welcome():
 
 
 def get_audio():
+    mixer.init()
+    mixer.music.load('AudioUsed\Mic2.mp3')
+    mixer.music.play()
     r = sr.Recognizer()
     with sr.Microphone() as source:           
 
@@ -200,8 +203,7 @@ def success():
         global first_listen
         global Chat_GPT
         Chat_GPT=TRUE
-        mixer.init()
-        mixer.music.load('AudioUsed\Mic2.mp3')
+        
         while True:
             def there_exists(terms):
                 for term in terms:
@@ -209,11 +211,11 @@ def success():
                         return True
             
 
-            print("Listening...")
+            
             if(first_listen==TRUE):
                 speak("What do you want me to do?")
             
-            mixer.music.play()
+            print("Listening...")
             first_listen=FALSE
             text = get_audio().lower()
             # open notepad
@@ -411,7 +413,7 @@ def success():
 
 
                     # new youtube
-            if there_exists(["youtube"]):
+            if there_exists(["youtube", "open youtube","youtube.com","You tube"]):
                 Chat_GPT=FALSE
                 url = f"https://youtube.com"
                 webbrowser.get().open(url)
@@ -424,6 +426,7 @@ def success():
                 pg.press("tab")
                 pg.press("tab")
                 pg.write(text)
+                time.sleep(1)
                 pg.press("enter")
                 speak(f'Here is what I found for {search_term} on youtube')
                 # choice of videos
@@ -460,6 +463,8 @@ def success():
                             pg.press("enter")
 
             if there_exists(["what is your name","your name"]):
+                global name
+                speak("My name is " + name + " and I am your personal assistant")
                 Listen()
             # 5: search google
             if there_exists(["google","search on the internet","look up on the internet","internet","search"]):
@@ -472,7 +477,7 @@ def success():
                 pg.write(text)
                 pg.press("enter")
                 speak(f'Here is what I found for {search_term} on google')
-            # Guessing number game
+           
             if there_exists(["change voice","switch voice","change to male voice","male voice","change assistant voice","male voice"]):
                 Chat_GPT=FALSE
                 global voice_variable
@@ -507,17 +512,15 @@ def success():
                 pyautogui.press('enter')
 
 
-            GAME_STRS = ["game"]
+            GAME_STRS = ["game","play","games","games"]
             for phrase in GAME_STRS:
                 if phrase in text:
                     Chat_GPT=FALSE
                     speak("Which game would you like to play?")
                     time.sleep(1)
-                    speak("Number 1: The guessing number game?")
-                    speak("or")
-                    speak("Number 2:The Hangman game?")
+                    speak("We can play the guessing number game. Would you like to play?")
                     text = get_audio().lower()
-                    if there_exists(["guess"]):
+                    if there_exists(["Yes","Let's Play"]):
                         hidden = random.randrange(10, 30)
                         lives = 5
                         speak("We will now play a guessing number game.")
