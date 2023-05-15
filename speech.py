@@ -201,7 +201,7 @@ def success():
         global Chat_GPT
         Chat_GPT=TRUE
         mixer.init()
-        mixer.music.load('Audio used\Mic2.mp3')
+        mixer.music.load('AudioUsed\Mic2.mp3')
         while True:
             def there_exists(terms):
                 for term in terms:
