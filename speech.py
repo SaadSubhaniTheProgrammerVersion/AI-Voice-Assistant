@@ -72,6 +72,8 @@ def welcome():
         root.mainloop()
 
 
+
+
 def get_audio():
     mixer.init()
     mixer.music.load('AudioUsed\Mic2.mp3')
@@ -189,7 +191,12 @@ def success():
         speak(f"Daytime Weather: {day_text}")
         speak(f"Nighttime Weather: {night_text}")
 
-
+    def check_stop(text):
+        if "stop" in text:
+            speak("Ok, I am stopping now.")
+            return True
+        else:
+            return False
     
     def ChatGPT(prompt):
         with open('gptkey.txt', 'r') as file:
@@ -203,6 +210,8 @@ def success():
         global first_listen
         global Chat_GPT
         Chat_GPT=TRUE
+
+        
         
         while True:
             def there_exists(terms):
@@ -260,6 +269,8 @@ def success():
                     speak("I can perform addition, subtraction, multiplication and some trigonometric calculation")
                     speak("What do you want me to perform here?")
                     text = get_audio()
+                    if check_stop(text):
+                        return
                     # addition
                     if there_exists(["+"]):
                         last_term = text.split("+ ")[-1]
@@ -382,6 +393,8 @@ def success():
                 Chat_GPT=FALSE
                 speak("Which city would you like to check the weather for?")
                 text = get_audio().lower()
+                if check_stop(text):
+                        return
                 get_daily_forecast(text)
 
             if there_exists(["spotify","music","open spotify","play a song","song"]):
@@ -392,14 +405,21 @@ def success():
                 time.sleep(3)
                 speak("Would you like to search for a song or an artist?")
                 text = get_audio().lower()  # calling function
+                if check_stop(text):
+                    return
+
                 if there_exists(["song"]):
                     tab_times=3
                     speak("What song would you like to play?")
                     text = get_audio().lower()  # calling function
+                    if check_stop(text):
+                        return
                 elif there_exists(["artist"]):
                     tab_times=2
                     speak("What artist would you like to play?")
                     text = get_audio().lower()  # calling function
+                    if check_stop(text):
+                        return
 
                 search_term = text
                 pg.write(text)
@@ -420,6 +440,8 @@ def success():
                 time.sleep(2)
                 speak("What would you like me to search?")
                 text = get_audio().lower()  # calling function
+                if check_stop(text):
+                    return
                 search_term = text
                 pg.press("tab")
                 pg.press("tab")
@@ -432,6 +454,8 @@ def success():
                 # choice of videos
                 speak(f'Which result would you like to watch? The first one or the second one?')
                 text = get_audio().lower()
+                if check_stop(text):
+                    return
                 # plays the first video if demanded
                 PLAY_STRS = ["first"]
                 for phrase in PLAY_STRS:
@@ -444,7 +468,7 @@ def success():
                             pyautogui.click(800,400)
 
                         else:
-                            pg.press("enter")
+                            speak("Sorry, I am unable to play the video. Please try again later.")
                 # plays second video if demanded
                 PLAYZ_STRS = ["second"]
                 for phrase in PLAYZ_STRS:
@@ -473,6 +497,8 @@ def success():
                 webbrowser.get().open(url)
                 speak("What would you like me to search?")
                 text = get_audio().lower()  # calling function
+                if check_stop(text):
+                    return
                 search_term = text
                 pg.write(text)
                 pg.press("enter")
@@ -488,10 +514,22 @@ def success():
                 first_listen= TRUE
                 Listen()
 
+            if there_exists(["instagram","insta","open instagram","instagram.com"]):
+                Chat_GPT=FALSE
+                url = f"https://instagram.com"
+                webbrowser.get().open(url)
+
+            if there_exists(["facebook","fb","open facebook","facebook.com"]):
+                Chat_GPT=FALSE
+                url = f"https://facebook.com"
+                webbrowser.get().open(url)
+
             if there_exists(["open an application","appliction","app"]):
                 Chat_GPT=FALSE
                 speak("Which application would you like to open?")
                 text = get_audio().lower()
+                if check_stop(text):
+                    return
                 pyautogui.press('win')
                 time.sleep(1)
                 pyautogui.write(text)
@@ -516,11 +554,11 @@ def success():
             for phrase in GAME_STRS:
                 if phrase in text:
                     Chat_GPT=FALSE
-                    speak("Which game would you like to play?")
-                    time.sleep(1)
                     speak("We can play the guessing number game. Would you like to play?")
                     text = get_audio().lower()
-                    if there_exists(["Yes","Let's Play"]):
+                    if check_stop(text):
+                        return
+                    if there_exists(["yes","let's play","game","sure"]):
                         hidden = random.randrange(10, 30)
                         lives = 5
                         speak("We will now play a guessing number game.")
