@@ -17,6 +17,7 @@ from tkinter import messagebox
 import pyautogui
 import requests
 import openai
+import subprocess
 
 #global voice settings
 voice_variable= 1
@@ -518,44 +519,48 @@ def success():
                     Chat_GPT=FALSE
                     speak("Which game would you like to play?")
                     time.sleep(1)
-                    speak("We can play the guessing number game. Would you like to play?")
                     text = get_audio().lower()
-                    if there_exists(["Yes","Let's Play"]):
-                        hidden = random.randrange(10, 30)
-                        lives = 5
-                        speak("We will now play a guessing number game.")
-                        speak("guess a number from 10 to 30")
-                        while (lives > 0):
-                            if lives == 1:
-                                speak("You have %d life left." % (lives))  # for one life
-                                print("You have %d life left." % (lives))
-                            else:
-                                speak("you have %d lives left." % (lives))  # for lives>1
-                                print("You have %d life left." % (lives))
-                            print("Guess now...")
-                            text = get_audio()
-                            if text.isdigit():
-                                guess = int(text)
-                                if guess == hidden:
-                                    print("Congratulations! You have guessed it")
-                                    speak("Congratulations! You have guessed it")
-                                    break
+                    if there_exists(["Chess", "chess"]):
+                        subprocess.run(["python", "chess.py"])
+                    if there_exists(["number", "guessing"]):
+                        speak("We can play the guessing number game. Would you like to play?")
+                        text = get_audio().lower()
+                        if there_exists(["Yes","Let's Play"]):
+                            hidden = random.randrange(10, 30)
+                            lives = 5
+                            speak("We will now play a guessing number game.")
+                            speak("guess a number from 10 to 30")
+                            while (lives > 0):
+                                if lives == 1:
+                                    speak("You have %d life left." % (lives))  # for one life
+                                    print("You have %d life left." % (lives))
                                 else:
-                                    if guess > hidden:
-                                        speak("Sorry, my number is smaller than %s." % guess)
-                                        lives = lives - 1
-                                    if guess < hidden:
-                                        speak("Sorry, my number is greater than %s." % guess)
-                                        lives = lives - 1
-                                if lives == 0 and guess != hidden:
-                                    print("You have lost the game!")
-                                    speak("You have lost the game!")
-                            else:
-                                speak("Please respond with a number only")
-                                lives = lives - 1
-                                if lives == 0:
-                                    print("You have lost the game!")
-                                    speak("You have lost the game!")
+                                    speak("you have %d lives left." % (lives))  # for lives>1
+                                    print("You have %d life left." % (lives))
+                                print("Guess now...")
+                                text = get_audio()
+                                if text.isdigit():
+                                    guess = int(text)
+                                    if guess == hidden:
+                                        print("Congratulations! You have guessed it")
+                                        speak("Congratulations! You have guessed it")
+                                        break
+                                    else:
+                                        if guess > hidden:
+                                            speak("Sorry, my number is smaller than %s." % guess)
+                                            lives = lives - 1
+                                        if guess < hidden:
+                                            speak("Sorry, my number is greater than %s." % guess)
+                                            lives = lives - 1
+                                    if lives == 0 and guess != hidden:
+                                        print("You have lost the game!")
+                                        speak("You have lost the game!")
+                                else:
+                                    speak("Please respond with a number only")
+                                    lives = lives - 1
+                                    if lives == 0:
+                                        print("You have lost the game!")
+                                        speak("You have lost the game!")
 
             if Chat_GPT==TRUE:
                         prompt = text
