@@ -64,7 +64,8 @@ from collections import Counter #For counting elements in a list effieciently.
 import threading #To allow for AI to think simultaneously while the GUI is coloring the board.
 import time
 import speech_recognition as sr
-import pyautogui as pg
+import pyautogui
+import threading
 
 play_sound=True
 
@@ -986,7 +987,6 @@ class PieceTable:
 ##############################////////GUI FUNCTIONS\\\\\\\\\\\\\#############################
 #########MAIN FUNCTION####################################################
 class GUI:
-
     def __init__(self):
         self.board = Board().getChess()
         self.c = Commands()
@@ -1057,6 +1057,7 @@ class GUI:
         clock = pygame.time.Clock()  # Helps controlling fps of the game.
         self.initialize()
         pygame.display.update()
+        board_loaded = False
         
         #########################INFINITE LOOP#####################################
         #The program remains in this loop until the user quits the application
@@ -1122,151 +1123,9 @@ class GUI:
                 #completely ignored:
                 if self.chessEnded or self.isTransition or self.isAIThink:
                     continue
-                #isDown means a piece is being dragged.
-                # if self.select<=2:
-                #     if not self.isDown and event.type == MOUSEBUTTONDOWN:
-                #         #Mouse was pressed down.
-                #         #Get the oordinates of the mouse
-                #         pos = pygame.mouse.get_pos()
-                #         if pos[0] in range(0,640) and pos[1] in range(0,640):
-                #         #convert to chess coordinates:
-                #             chess_coord = self.pixel_coord_to_chess(pos)
-                #             x = chess_coord[0]
-                #             y = chess_coord[1]
-                #             #If the piece clicked on is not occupied by your own piece,
-                #             #ignore this mouse click:
-                #             if not self.c.isOccupiedby(self.board,x,y,'wb'[self.player]):
-                #                 continue
-                #             #Now we're sure the user is holding their mouse on a
-                #             #piecec that is theirs.
-                #             #Get reference to the piece that should be dragged around or selected:
-                #             dragPiece = self.getPiece(chess_coord)
-                #             #Find the possible squares that this piece could attack:
-                #             listofTuples = self.c.findPossibleSquares(self.position,x,y)
-                #             #Highlight all such squares:
-                #             self.createShades(listofTuples)
-                #             #A green box should appear on the square which was selected, unless
-                #             #it's a king under check, in which case it shouldn't because the king
-                #             #has a red color on it in that case.
-                #             if dragPiece:
-                #                 if ((dragPiece.pieceinfo[0]=='K') and
-                #                     (self.c.isCheck(self.position,'white') or self.c.isCheck(self.position,'black'))):
-                #                     None
-                #                 else:
-                #                     self.listofShades.append(Shades(self.greenbox_image,(x,y)))
-                #                 #A piece is being dragged:
-                #             self.isDown = True
-                #     if (self.isDown or self.isClicked) and event.type == MOUSEBUTTONUP:
-                #         #Mouse was released.
-                #         self.isDown = False
-                #         #Snap the piece back to its coordinate position
-                #         if dragPiece:
-                #             dragPiece.setpos((-1,-1))
-                #         #Get coordinates and convert them:
-                #         pos = pygame.mouse.get_pos()
-                #         chess_coord = self.pixel_coord_to_chess(pos)
-                #         x2 = chess_coord[0]
-                #         y2 = chess_coord[1]
-                #         #Initialize:
-                #         self.isTransition = False
-                #         if (x,y)==(x2,y2): #NO dragging occured
-                #             #(ie the mouse was held and released on the same square)
-                #             if not self.isClicked: #nothing had been clicked previously
-                #                 #This is the first click
-                #                 self.isClicked = True
-                #                 self.prevPos = (x,y) #Store it so next time we know the origin
-                #             else: #Something had been clicked previously
-                #                 #Find out location of previous click:
-                #                 x,y = self.prevPos
-                #                 if (x,y)==(x2,y2): #User clicked on the same square again.
-                #                     #So
-                #                     self.isClicked = False
-                #                     #Destroy all shades:
-                #                     self.createShades([])
-                #                 else:
-                #                     #User clicked elsewhere on this second click:
-                #                     if self.c.isOccupiedby(self.board,x2,y2,'wb'[self.player]):
-                #                         #User clicked on a square that is occupied by their
-                #                         #own piece.
-                #                         #This is like making a first click on your own piece:
-                #                         self.isClicked = True
-                #                         self.prevPos = (x2,y2) #Store it
-                #                     else:
-                #                         #The user may or may not have clicked on a valid target square.
-                #                         self.isClicked = False
-                #                         #Destory all shades
-                #                         self.createShades([])
-                #                         self.isTransition = True #Possibly if the move was valid.
-
-
-                #         if not (x2,y2) in listofTuples:
-                #             #Move was invalid
-                #             self.isTransition = False
-                #             continue
-                #         #Reaching here means a valid move was selected.
-                #         #If the recording option was selected, store the move to the opening dictionary:
-                #         if self.isRecord:
-                #             key = self.c.pos2key(self.position)
-                #             #Make sure it isn't already in there:
-                #             if [(x,y),(x2,y2)] not in self.openings[key]:
-                #                 self.openings[key].append([(x,y),(x2,y2)])
-
-                #         #Make the move:
-                #         self.c.makemove(self.position,x,y,x2,y2)
-                #         #Update this move to be the 'previous' move (latest move in fact), so that
-                #         #yellow shades can be shown on it.
-                #         self.prevMove = [x,y,x2,y2]
-                #         #Update which player is next to play:
-                #         self.player = self.position.getplayer()
-                #         if self.player == 1:
-                #             pygame.mixer.Sound.play(self.piece_sound)
-                #         else:
-                #             pygame.mixer.Sound.play(self.piece_sound)
-                #         #Add the new position to the history for it:
-                #         self.position.addtoHistory(self.position)
-                #         #Check for possibilty of draw:
-                #         HMC = self.position.getHMC()
-                #         if HMC>=100 or self.c.isStalemate(self.position) or self.position.checkRepition():
-                #             #There is a draw:
-                #             self.isDraw = True
-                #             self.chessEnded = True
-                #         #Check for possibilty of checkmate:
-                #         if self.c.isCheckmate(self.position,'white'):
-                #             self.winner = 'b'
-                #             self.chessEnded = True
-                #         if self.c.isCheckmate(self.position,'black'):
-                #             self.winner = 'w'
-                #             self.chessEnded = True
-                #         #If the AI option was selected and the game still hasn't finished,
-                #         #let the AI start thinking about its next move:
-                #         if self.isAI and not self.chessEnded:
-                #             if self.player==0:
-                #                 colorsign = 1
-                #             else:
-                #                 colorsign = -1
-                #             self.bestMoveReturn = []
-                #             self.move_thread = threading.Thread(target = self.a.negamax,
-                #                         args = (self.position,self.level,-1000000,1000000,colorsign,self.bestMoveReturn,self.openings,self.searched))
-                #             self.move_thread.start()
-                #             self.isAIThink = True
-
-                #         #Move the piece to its new destination:
-                #         dragPiece.setcoord((x2,y2))
-                #         #There may have been a capture, so the piece list should be regenerated.
-                #         #However, if animation is ocurring, the the captured piece should still remain visible.
-                #         if not self.isTransition:
-                #             self.listofWhitePieces,self.listofBlackPieces = self.createPieces(self.board)
-                #         else:
-                #             movingPiece = dragPiece
-                #             origin = self.chess_coord_to_pixels((x,y))
-                #             destiny = self.chess_coord_to_pixels((x2,y2))
-                #             movingPiece.setpos(origin)
-                #             step = (destiny[0]-origin[0],destiny[1]-origin[1])
-
-                #         #Either way shades should be deleted now:
-                #         self.createShades([])
                 if 1:
-                    if event.type == pygame.MOUSEBUTTONDOWN and event.button==1:
+                    if board_loaded:
+                    #if event.type == pygame.MOUSEBUTTONDOWN and event.button==1:
                         if self.player==1:
                             self.letters_dict = {'a': 7, 'b': 6, 'c': 5, 'd': 4, 'e': 3, 'f': 2, 'g': 1, 'h': 0}
                             self.numbers_dict = {'1': 0, '2': 1, '3': 2, '4': 3, '5': 4, '6': 5, '7': 6, '8': 7}
@@ -1367,7 +1226,7 @@ class GUI:
 
                         
                     #Move to Destination Using voice
-                    elif self.piece_selected_by_voice and event.type==pygame.MOUSEBUTTONDOWN and event.button==3 :
+                    if self.piece_selected_by_voice:
                         self.piece_selected_by_voice = False
                         with sr.Microphone() as source:
                             while True:
@@ -1503,6 +1362,7 @@ class GUI:
 
                                             # Either way shades should be deleted now:
                                             self.createShades([])
+                                            time.sleep(1.5)
                                             break
 
                                 except sr.UnknownValueError:
@@ -1582,6 +1442,7 @@ class GUI:
 
             #Run at specific fps:
             clock.tick(60)
+            board_loaded = True
 
         #Out of loop. Quit pygame:
         time.sleep(2)

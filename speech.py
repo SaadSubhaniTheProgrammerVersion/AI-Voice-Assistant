@@ -520,6 +520,7 @@ def success():
                     speak("Which game would you like to play?")
                     time.sleep(1)
                     text = get_audio().lower()
+                    print(text)
                     if there_exists(["Chess", "chess"]):
                         subprocess.run(["python", "chess.py"])
                     if there_exists(["number", "guessing"]):
