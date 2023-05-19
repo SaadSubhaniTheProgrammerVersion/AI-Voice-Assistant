@@ -1057,6 +1057,7 @@ class GUI:
         clock = pygame.time.Clock()  # Helps controlling fps of the game.
         self.initialize()
         pygame.display.update()
+        time.sleep(1.5)
         board_loaded = False
         
         #########################INFINITE LOOP#####################################
@@ -1125,7 +1126,7 @@ class GUI:
                 if self.chessEnded or self.isTransition or self.isAIThink:
                     continue
                 if 1:
-                    if board_loaded:
+                    if board_loaded and not self.piece_selected_by_voice:
                     #if event.type == pygame.MOUSEBUTTONDOWN and event.button==1:
                         if self.player==1:
                             self.letters_dict = {'a': 7, 'b': 6, 'c': 5, 'd': 4, 'e': 3, 'f': 2, 'g': 1, 'h': 0}
@@ -1218,7 +1219,7 @@ class GUI:
                                                 None
                                             else:
                                                 self.listofShades.append(Shades(self.greenbox_image, (x, y)))
-                                            self.piece_selected_by_voice = True
+                                        self.piece_selected_by_voice = True
                             except sr.UnknownValueError:
                                 pygame.mixer.Sound.play(self.repeat_sound)
                             except sr.RequestError:
@@ -1227,8 +1228,15 @@ class GUI:
                                 pygame.mixer.Sound.play(self.repeat_sound)
 
                     #Move to Destination Using voice
-                    if self.piece_selected_by_voice:
+                    pygame.event.post(pygame.event.Event(MOUSEBUTTONDOWN, button=3, pos=(100, 100)))
+                    if self.piece_selected_by_voice and event.type==pygame.MOUSEBUTTONDOWN and event.button==3 :
                         self.piece_selected_by_voice = False
+                        self.drawBoard()
+                        pygame.display.update()
+
+                        #Run at specific fps:
+                        clock.tick(60)
+                        # time.sleep(1.5)
                         with sr.Microphone() as source:
                             while True:
                                 self.r.adjust_for_ambient_noise(source)
@@ -1363,15 +1371,15 @@ class GUI:
 
                                             # Either way shades should be deleted now:
                                             self.createShades([])
-                                            time.sleep(1.5)
+                                            # time.sleep(1.5)
                                             break
 
                                 except sr.UnknownValueError:
-                                    pygame.mixer.Sound.play(self.repeat_sound)
+                                    pass
                                 except sr.RequestError:
                                     pygame.mixer.Sound.play(self.requesterror_sound)
                                 except Exception:
-                                    pygame.mixer.Sound.play(self.repeat_sound)
+                                    pass
 
 
 
