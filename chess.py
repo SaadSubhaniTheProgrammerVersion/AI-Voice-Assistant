@@ -1112,6 +1112,7 @@ class GUI:
             if self.isAIThink and self.numm%10==0:
                 self.Thinking()
                       
+            pygame.event.post(pygame.event.Event(MOUSEBUTTONDOWN, button=1, pos=(100, 100)))
             for event in pygame.event.get():
                 #Deal with all the user inputs:
                 if event.type==QUIT:
@@ -1199,12 +1200,13 @@ class GUI:
                                         if not self.c.isOccupiedby(self.board, x, y, 'wb'[self.player]):
                                             continue
                                         # Now we're sure the user is holding their mouse on a
-                                        # piecec that is theirs.
+                                        # piece that is theirs.
                                         # Get reference to the piece that should be dragged around or selected:
                                         dragPiece = self.getPiece(chess_coord)
                                         # Find the possible squares that this piece could attack:
                                         listofTuples = self.c.findPossibleSquares(self.position, x, y)
                                         # Highlight all such squares:
+
                                         self.createShades(listofTuples)
                                         # A green box should appear on the square which was selected, unless
                                         # it's a king under check, in which case it shouldn't because the king
@@ -1216,7 +1218,7 @@ class GUI:
                                                 None
                                             else:
                                                 self.listofShades.append(Shades(self.greenbox_image, (x, y)))
-                                        self.piece_selected_by_voice = True
+                                            self.piece_selected_by_voice = True
                             except sr.UnknownValueError:
                                 pygame.mixer.Sound.play(self.repeat_sound)
                             except sr.RequestError:
@@ -1224,7 +1226,6 @@ class GUI:
                             except Exception:
                                 pygame.mixer.Sound.play(self.repeat_sound)
 
-                        
                     #Move to Destination Using voice
                     if self.piece_selected_by_voice:
                         self.piece_selected_by_voice = False
