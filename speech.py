@@ -596,6 +596,7 @@ def success():
                                     print("You have lost the game!")
                                     speak("You have lost the game!")
                     if there_exists(["chess"]):
+                        Chat_GPT=FALSE
                         subprocess.run(['python', "chess.py"])
 
             if there_exists(["play chess","chess"]):
