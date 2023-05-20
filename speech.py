@@ -600,7 +600,8 @@ def success():
                         subprocess.run(['python', "chess.py"])
 
             if there_exists(["play chess","chess"]):
-                    subprocess.run(['python', "chess.py"])
+                Chat_GPT=FALSE
+                subprocess.run(['python', "chess.py"])
 
             if Chat_GPT==TRUE:
                         prompt = text
