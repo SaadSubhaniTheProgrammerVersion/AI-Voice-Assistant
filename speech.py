@@ -550,15 +550,16 @@ def success():
                 pyautogui.press('enter')
 
 
-            GAME_STRS = ["game","play","games","games"]
+            GAME_STRS = ["game","games"]
             for phrase in GAME_STRS:
                 if phrase in text:
                     Chat_GPT=FALSE
-                    speak("We can play the guessing number game. Would you like to play?")
+                    speak("Whcih game would you like to play?")
+                    speak("I can play the guessing number game or chess which one would you like to play?")
                     text = get_audio().lower()
                     if check_stop(text):
                         return
-                    if there_exists(["yes","let's play","game","sure"]):
+                    if there_exists(["number","guessing"]):
                         hidden = random.randrange(10, 30)
                         lives = 5
                         speak("We will now play a guessing number game.")
@@ -594,6 +595,11 @@ def success():
                                 if lives == 0:
                                     print("You have lost the game!")
                                     speak("You have lost the game!")
+                    if there_exists(["chess"]):
+                        subprocess.run(['python', "chess.py"])
+
+            if there_exists(["play chess","chess"]):
+                    subprocess.run(['python', "chess.py"])
 
             if Chat_GPT==TRUE:
                         prompt = text
