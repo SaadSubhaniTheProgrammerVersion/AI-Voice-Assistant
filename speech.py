@@ -440,9 +440,13 @@ def success():
                 time.sleep(2)
                 speak("What would you like me to search?")
                 text = get_audio().lower()  # calling function
+                    
                 if check_stop(text):
-                    return
+                    return            
+                
                 search_term = text
+                
+                
                 pg.press("tab")
                 pg.press("tab")
                 pg.press("tab")
@@ -599,9 +603,20 @@ def success():
                         Chat_GPT=FALSE
                         subprocess.run(['python', "chess.py"])
 
+
+
             if there_exists(["play chess","chess"]):
                 Chat_GPT=FALSE
                 subprocess.run(['python', "chess.py"])
+
+            if there_exists(["say thank you","say thanks","participants"]):
+                Chat_GPT=FALSE
+                speak("Thank you everyone for listening to me. I hope you enjoyed my presentation. Signing off")
+                mixer.init()
+                mixer.music.load('AudioUsed\Bye.mp3')
+                mixer.music.play()
+                time.sleep(3)
+                exit()
 
             if Chat_GPT==TRUE:
                         prompt = text

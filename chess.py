@@ -1183,7 +1183,9 @@ class GUI:
                                     voice='f5'
                                 elif voice=='quit' or voice =='end' or voice == 'close' or voice=='stop' or voice=='friend' or voice=='top' or voice=='finish':
                                     pygame.mixer.Sound.play(self.exit_sound)
+                                    time.sleep(2)
                                     self.gameEnded=True
+                                    exit()
                                 if len(voice) == 2:
                                     letter = voice[0]
                                     number = voice[1]
@@ -1286,8 +1288,9 @@ class GUI:
                                         voice2='g4'
                                     elif voice2 == 'quit' or voice2 == 'end' or voice2 == 'close' or voice2=='stop' or voice2=='friend' or voice2=='top' or voice2=='finish' or voice2=='and':
                                         pygame.mixer.Sound.play(self.exit_sound)
+                                        time.sleep(2)
                                         self.gameEnded=True
-                                        break
+                                        exit()
                                     if len(voice2) == 2:
                                         letter = voice2[0]
                                         number = voice2[1]
