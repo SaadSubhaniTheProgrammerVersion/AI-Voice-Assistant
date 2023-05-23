@@ -7,12 +7,16 @@ import datetime
 from pygame import mixer  # Load the popular external library
 import time
 from tkinter import Tk, PhotoImage
+import speech_recognition as sr
 import subprocess
 import pyautogui as pg
 from PIL import ImageTk
+import pyttsx3
 from tkinter import *
 from tkinter import messagebox
 import pyautogui
+import requests
+import openai
 
 import sounddevice as sd
 import numpy as np
@@ -27,11 +31,10 @@ import soundfile as sf
 
 
 #global voice settings
-first_listen=TRUE
+voice_variable= 1
+first_listen= TRUE
 name=""
 Chat_GPT= TRUE
-
-
 
 def speak(text):
     processor = SpeechT5Processor.from_pretrained("microsoft/speecht5_tts")
@@ -49,32 +52,6 @@ def speak(text):
     sf.write("speech.wav", speech.numpy(), samplerate=16000)
     print(f"AI: {text}")  # print what AI said
 
-def get_audio():
-    duration = 5  # seconds
-    fs = 44100  # Sample rate
-
-    myrecording = sd.rec(int(duration * fs), samplerate=fs, channels=2)
-    sd.wait()  # Wait for the recording to finish
-
-    write("input.wav", fs, myrecording)  # Save as WAV file 
-
-    rate, data = read("input.wav")
-
-    if len(data.shape) > 1:  # check if audio file is stereo
-        data = np.mean(data, axis=1)  # convert to mono
-
-    reduced_noise = nr.reduce_noise(y=data, sr=rate)
-
-    write("clean_input.wav", fs, reduced_noise)
-
-    model = SpeechRecognitionModel("jonatasgrosman/wav2vec2-large-xlsr-53-english")
-    audio_paths = ["clean_input.wav"]
-    transcriptions = model.transcribe(audio_paths)
-    
-    transcription = transcriptions[0]["transcription"]
-    print(transcription)
-
-    return transcription.lower()
 
 def welcome():
     import imageio
@@ -108,6 +85,35 @@ def welcome():
         root.after(8000, root.destroy)  # milliseconds
         root.mainloop()
 
+
+
+
+def get_audio():
+    duration = 5  # seconds
+    fs = 44100  # Sample rate
+
+    myrecording = sd.rec(int(duration * fs), samplerate=fs, channels=2)
+    sd.wait()  # Wait for the recording to finish
+
+    write("input.wav", fs, myrecording)  # Save as WAV file 
+
+    rate, data = read("input.wav")
+
+    if len(data.shape) > 1:  # check if audio file is stereo
+        data = np.mean(data, axis=1)  # convert to mono
+
+    reduced_noise = nr.reduce_noise(y=data, sr=rate)
+
+    write("clean_input.wav", fs, reduced_noise)
+
+    model = SpeechRecognitionModel("jonatasgrosman/wav2vec2-large-xlsr-53-english")
+    audio_paths = ["clean_input.wav"]
+    transcriptions = model.transcribe(audio_paths)
+    
+    transcription = transcriptions[0]["transcription"]
+    print(transcription)
+
+    return transcription.lower()
 
 def success():
     def help():
@@ -205,7 +211,12 @@ def success():
         speak(f"Daytime Weather: {day_text}")
         speak(f"Nighttime Weather: {night_text}")
 
-
+    def check_stop(text):
+        if "stop" in text:
+            speak("Ok, I am stopping now.")
+            return True
+        else:
+            return False
     
     def ChatGPT(prompt):
         with open('gptkey.txt', 'r') as file:
@@ -219,8 +230,9 @@ def success():
         global first_listen
         global Chat_GPT
         Chat_GPT=TRUE
-        mixer.init()
-        mixer.music.load('AudioUsed/Mic2.mp3')
+
+        
+        
         while True:
             def there_exists(terms):
                 for term in terms:
@@ -228,11 +240,11 @@ def success():
                         return True
             
 
-            print("Listening...")
+            
             if(first_listen==TRUE):
                 speak("What do you want me to do?")
             
-            mixer.music.play()
+            print("Listening...")
             first_listen=FALSE
             text = get_audio().lower()
             # open notepad
@@ -277,6 +289,8 @@ def success():
                     speak("I can perform addition, subtraction, multiplication and some trigonometric calculation")
                     speak("What do you want me to perform here?")
                     text = get_audio()
+                    if check_stop(text):
+                        return
                     # addition
                     if there_exists(["+"]):
                         last_term = text.split("+ ")[-1]
@@ -399,6 +413,8 @@ def success():
                 Chat_GPT=FALSE
                 speak("Which city would you like to check the weather for?")
                 text = get_audio().lower()
+                if check_stop(text):
+                        return
                 get_daily_forecast(text)
 
             if there_exists(["spotify","music","open spotify","play a song","song"]):
@@ -409,14 +425,21 @@ def success():
                 time.sleep(3)
                 speak("Would you like to search for a song or an artist?")
                 text = get_audio().lower()  # calling function
+                if check_stop(text):
+                    return
+
                 if there_exists(["song"]):
                     tab_times=3
                     speak("What song would you like to play?")
                     text = get_audio().lower()  # calling function
+                    if check_stop(text):
+                        return
                 elif there_exists(["artist"]):
                     tab_times=2
                     speak("What artist would you like to play?")
                     text = get_audio().lower()  # calling function
+                    if check_stop(text):
+                        return
 
                 search_term = text
                 pg.write(text)
@@ -430,24 +453,33 @@ def success():
 
 
                     # new youtube
-            if there_exists(["youtube"]):
+            if there_exists(["youtube", "open youtube","youtube.com","You tube"]):
                 Chat_GPT=FALSE
                 url = f"https://youtube.com"
                 webbrowser.get().open(url)
                 time.sleep(2)
                 speak("What would you like me to search?")
                 text = get_audio().lower()  # calling function
+                    
+                if check_stop(text):
+                    return            
+                
                 search_term = text
+                
+                
                 pg.press("tab")
                 pg.press("tab")
                 pg.press("tab")
                 pg.press("tab")
                 pg.write(text)
+                time.sleep(1)
                 pg.press("enter")
                 speak(f'Here is what I found for {search_term} on youtube')
                 # choice of videos
                 speak(f'Which result would you like to watch? The first one or the second one?')
                 text = get_audio().lower()
+                if check_stop(text):
+                    return
                 # plays the first video if demanded
                 PLAY_STRS = ["first"]
                 for phrase in PLAY_STRS:
@@ -460,7 +492,7 @@ def success():
                             pyautogui.click(800,400)
 
                         else:
-                            pg.press("enter")
+                            speak("Sorry, I am unable to play the video. Please try again later.")
                 # plays second video if demanded
                 PLAYZ_STRS = ["second"]
                 for phrase in PLAYZ_STRS:
@@ -479,6 +511,8 @@ def success():
                             pg.press("enter")
 
             if there_exists(["what is your name","your name"]):
+                global name
+                speak("My name is " + name + " and I am your personal assistant")
                 Listen()
             # 5: search google
             if there_exists(["google","search on the internet","look up on the internet","internet","search"]):
@@ -487,11 +521,13 @@ def success():
                 webbrowser.get().open(url)
                 speak("What would you like me to search?")
                 text = get_audio().lower()  # calling function
+                if check_stop(text):
+                    return
                 search_term = text
                 pg.write(text)
                 pg.press("enter")
                 speak(f'Here is what I found for {search_term} on google')
-            # Guessing number game
+           
             if there_exists(["change voice","switch voice","change to male voice","male voice","change assistant voice","male voice"]):
                 Chat_GPT=FALSE
                 global voice_variable
@@ -502,10 +538,22 @@ def success():
                 first_listen= TRUE
                 Listen()
 
+            if there_exists(["instagram","insta","open instagram","instagram.com"]):
+                Chat_GPT=FALSE
+                url = f"https://instagram.com"
+                webbrowser.get().open(url)
+
+            if there_exists(["facebook","fb","open facebook","facebook.com"]):
+                Chat_GPT=FALSE
+                url = f"https://facebook.com"
+                webbrowser.get().open(url)
+
             if there_exists(["open an application","appliction","app"]):
                 Chat_GPT=FALSE
                 speak("Which application would you like to open?")
                 text = get_audio().lower()
+                if check_stop(text):
+                    return
                 pyautogui.press('win')
                 time.sleep(1)
                 pyautogui.write(text)
@@ -526,17 +574,16 @@ def success():
                 pyautogui.press('enter')
 
 
-            GAME_STRS = ["game"]
+            GAME_STRS = ["game","games"]
             for phrase in GAME_STRS:
                 if phrase in text:
                     Chat_GPT=FALSE
-                    speak("Which game would you like to play?")
-                    time.sleep(1)
-                    speak("Number 1: The guessing number game?")
-                    speak("or")
-                    speak("Number 2:The Hangman game?")
+                    speak("Whcih game would you like to play?")
+                    speak("I can play the guessing number game or chess which one would you like to play?")
                     text = get_audio().lower()
-                    if there_exists(["guess"]):
+                    if check_stop(text):
+                        return
+                    if there_exists(["number","guessing"]):
                         hidden = random.randrange(10, 30)
                         lives = 5
                         speak("We will now play a guessing number game.")
@@ -572,6 +619,24 @@ def success():
                                 if lives == 0:
                                     print("You have lost the game!")
                                     speak("You have lost the game!")
+                    if there_exists(["chess"]):
+                        Chat_GPT=FALSE
+                        subprocess.run(['python', "chess.py"])
+
+
+
+            if there_exists(["play chess","chess"]):
+                Chat_GPT=FALSE
+                subprocess.run(['python', "chess.py"])
+
+            if there_exists(["say thank you","say thanks","participants"]):
+                Chat_GPT=FALSE
+                speak("Thank you everyone for listening to me. I hope you enjoyed my presentation. Signing off")
+                mixer.init()
+                mixer.music.load('AudioUsed/Bye.mp3')
+                mixer.music.play()
+                time.sleep(3)
+                exit()
 
             if Chat_GPT==TRUE:
                         prompt = text
