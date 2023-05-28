@@ -523,6 +523,11 @@ def success():
                 url = f"https://instagram.com"
                 webbrowser.get().open(url)
 
+            if there_exists(["netflix","netflix.com"]):
+                Chat_GPT=FALSE
+                url = f"https://netflix.com"
+                webbrowser.get().open(url)
+
             if there_exists(["facebook","fb","open facebook","facebook.com"]):
                 Chat_GPT=FALSE
                 url = f"https://facebook.com"
